@@ -1,0 +1,12 @@
+{
+  "name": "JTableMonitor",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "node-phantom": "~0.2.5",
+    "async": "~0.2.9"
+  }
+}
