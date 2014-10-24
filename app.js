@@ -1,68 +1,51 @@
-var phantom = require('node-phantom');
+var phantom = require('phantom');
 var async = require('async');
 
 async.forever(function (next) {
-	/*
-		URL de la página de donde se extraen los datos
-	*/
-	var url = 'http://lightswitch05.github.io/table-to-json';
-	phantom.create(function(err,ph) {
-		if(!err){
-		  return ph.createPage(function(err,page) {
-		  	if(!err){
-			    return page.open(url, function(err,status) {
-			      console.log("status de página", status);
-			      
-			      page.injectJs(__dirname + '/lib/jquery-2.0.3.min.js', function(err) {
 
-			      	page.injectJs(__dirname + '/lib/table-to-json.min.js', function(err) {	
-									        
-				      	if(!err){
+//URL public
+var url = 'http://lightswitch05.github.io/table-to-json';
 
-					        setTimeout(function() {
-					          return page.evaluate(function() {
-					          	/* 
-					          		Selector de la tabla de datos 
-					          	*/
-											var table = $('#example-table').tableToJSON();
-
-					            return {
-					              table: table 
-					            };
-					          }, function(err,result) {
-					          	if(!err){
-					          		console.log(result);
-					          		next();
-					          	}else{
-					          		console.log("Error de Lectura de Datos");
-					          	}
-					            ph.exit();
-					          });
-					        }, 5000);
-
-				      	}else{
-				      		console.log("Error de lib de javascript");
-				      	}
-
-				      });	
-
-			      });
-
-
-			    });
-				}else{
-					console.log("Error createPage");
-				}
-		  });
-		}else{
-			console.log("Error create");
-		}
+phantom.create(function (ph) {
+	ph.createPage(function (page) {
+		page.open(url, function (status) {
+			if(status == 'success'){
+				page.injectJs('lib/jquery-2.0.3.min.js', function (status) {
+					if(status){
+						page.injectJs('lib/table-to-json.min.js', function(status) {
+							if(status){
+								setTimeout(function() {
+									return page.evaluate(function() {
+										// selector of table
+										var table = $('#example-table').tableToJSON();
+										return {
+											table: table
+										};
+									}, function(err,result) {
+										if(!err){
+											console.log(result);
+											next();
+										}else{
+											console.log("Error, reader data");
+										}
+										ph.exit();
+									});
+								}, 5000);
+							}else{
+								console.log('Error, loader lib table-to-json');
+							}
+						});
+					}else{
+						console.log('Error, loader lib jquery');
+					}
+				});
+			}else{
+				console.log('Error, URL request');
+			}
+		});
 	});
-}, function (err) {
-	if(err){
-		console.log("Error de Lectura de Datos");
-	}
 });
 
-/* El proceso de actualización cada 15 - 20 seg aproximadamente /*
-
+}, function (err) {
+	console.log('Error, forever');
+});
